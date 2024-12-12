@@ -1,17 +1,18 @@
 import functools
-from collections import Counter, defaultdict
 
 @functools.cache
-def helper(stone):
+def helper(stone, iter):
+    if iter == 0:
+        return 1
     if stone == '0':
-        return ['1']
+        return helper('1', iter - 1)
     elif len(stone) % 2 == 0:
         halfIndex = int(len(stone)/2)
         leftHalf = stone[:halfIndex]
         rightHalf = stone[halfIndex:]
-        return [leftHalf, str(int(rightHalf))]
+        return helper(leftHalf, iter - 1) + helper(str(int(rightHalf)), iter - 1)
     else:
-        return [str(int(stone) * 2024)]
+        return helper(str(int(stone) * 2024), iter - 1)
 
 with open('input.txt') as file:
     stones = []
@@ -19,13 +20,7 @@ with open('input.txt') as file:
         line = line.rstrip("\n")
         for c in line.split(' '):
             stones.append(c)
-    
-    stones = Counter(stones)
-
-    for i in range(75):
-        stone_counter = defaultdict(int)
-        for stone in stones.keys():
-            for val in helper(stone):
-                stone_counter[val] += stones[stone]
-        stones = stone_counter
-        print("Iter " + str(i) + ": " + str(sum(stones.values())))
+    ret = 0
+    for stone in stones:
+        ret += helper(stone, 75)
+    print(ret)
